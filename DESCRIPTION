@@ -1,0 +1,28 @@
+Package: MEPmodeler
+Type: Package
+Version: 0.99.1
+Title: Predict MicroExons in a Plant Genome
+Authors@R: c(person("Huihui", "Yu", role = c("aut", "cre"), 
+                    email = "yuhuihui2011@foxmail.com", 
+                    comment = c(ORCID = "0000-0003-2725-1937")),
+             person("Chi", "Zhang", role="aut", email="czhang5@unl.edu", 
+                    comment = c(ORCID = '0000-0002-1827-8137')))
+Description: MEPmodeler searches microexon-tags in 45 conserved microexon 
+    clusters in plants using gapped Position Weight Matrix (PWM). The function 
+    MEPmod uses the data MEPdata to mode microexon-tags in a plant genome. 
+    The only input file is plant genomic sequences or a plant genome. 
+    The sequences on both plus and minus strands will be scanned. 
+URL: https://github.com/yuhuihui2011/MEPmodeler
+BugReports: https://github.com/yuhuihui2011/MEPmodeler/issues
+License: GPL (>= 2.0)
+Depends: R (>= 4.0)
+Imports: GenomicRanges, Biostrings, IRanges, S4Vectors, parallel,
+        methods
+Suggests: knitr, rmarkdown, BSgenome, BiocManager, ggseqlogo,
+        BSgenome.Athaliana.TAIR.TAIR9
+VignetteBuilder: knitr
+biocViews: RNASeq, AlternativeSplicing, GenePrediction,
+        FunctionalPrediction, GenomeAnnotation
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
