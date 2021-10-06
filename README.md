@@ -1,6 +1,6 @@
-# MEPmodeler: Predict <i>M</i>icro<i>E</i>xons in a <i>P</i>lant Genome
+# MEPmodeler: Predict <i>M</i>icro<i>E</i>xons in <i>P</i>lant Genomes
 
-MEPmodeler searches microexon-tags in 45 conserved microexon clusters in plants using gapped Position Weight Matrix (PWM). The function MEPmod uses the data MEPdata to mode microexon-tags in a plant genome. The only input file is plant genomic sequences or a plant genome. The sequences on both plus and minus strands will be scanned. 
+MEPmodeler searches microexon-tags in 45 conserved microexon clusters in plant genomes using gapped Position Weight Matrix (PWM). The only one function, ***MEPmod***, uses the data ***MEPdata*** to model microexons in plant genomes. The only input file is plant genomic sequences or a plant genome. The sequences on both plus and minus strands will be scanned. 
 <br>
 
 ## Table of contents
@@ -69,6 +69,7 @@ mep
 ```
 
 ## Parameters
+The arguments of the function ***MEPmod*** are as follows:
 | Parameter  | Description  |
 | :---------- | :---------- |
 | genome      | the path(s) to the fasta file(s) or a 'DNAStringSet' object.  |
@@ -81,7 +82,7 @@ mep
 #### Warning: The program may be very slow or get stuck for a large genome (> 5 Gb) or a large span region (> 20 kb). 
 
 ## Output
-MEPmod will returm a GRanges of microexons with metadata columns. The metadata columns contain:
+The function ***MEPmod*** will returm a GRanges of microexons with 8 metadata columns:
 | Column name  | Description |
 | :---------- | :---------- |
 | NT | 108 bp DNA sequence of microexon-tag (72 bp for cluster 1 and 2) |
