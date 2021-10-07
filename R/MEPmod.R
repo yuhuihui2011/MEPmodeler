@@ -271,7 +271,7 @@ mapPWM<-function(cons,exons,genome,focus=2, min.score='80%',include.intronLoss=T
     minus<-unlist(IRangesList(minus[elementNROWS(minus)>0]))
     if (length(minus)==0) minus<-GRanges() else minus<-GRanges(names(minus),minus,'-')
     
-    res<-append(plus,minus)
+    res<-suppressWarnings(append(plus,minus))
     res<-res[grep("\\*",res$AA,invert = TRUE)]
     if(length(res)>0) {
         res$score<-round(vapply(res$NT, function(x) PWMscoreStartingAt(pwm,x), 1.0),4)
