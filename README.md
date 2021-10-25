@@ -13,10 +13,10 @@ MEPmodeler searches microexon-tags in 45 conserved microexon clusters in plant g
 - [Citation](#citation)
 
 ## Requirements
-MEPmodeler requires the following R packages and the dependents:
-+ [Biostrings](https://bioconductor.org/packages/Biostrings)
-+ [GenomicRanges](https://bioconductor.org/packages/GenomicRanges)
-+ [BSgenome](https://bioconductor.org/packages/BSgenome)
+MEPmodeler requires the following R (>= 4.0) packages and the dependents:
++ [Biostrings](https://bioconductor.org/packages/Biostrings) (>= 2.58.0)
++ [GenomicRanges](https://bioconductor.org/packages/GenomicRanges) (>= 1.42.0)
++ [BSgenome](https://bioconductor.org/packages/BSgenome) (>= 1.58.0)
 
 ## Installation
 Start R (>= 4.0) and run:
