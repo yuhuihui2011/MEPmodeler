@@ -191,4 +191,4 @@ names(prot)<-as.character(mep)
 writeXStringSet(prot,"prot.fasta")
 ```
 ## Citation
-Huihui Yu, Mu Li, Jaspreet Sandhu, Guangchao Sun, James C. Schnable, Harkamal Walia, Weibo Xie, Bin Yu, Jeffrey P. Mower, Chi Zhang. Pervasive misannotation of microexons that are evolutionarily conserved and crucial for gene function in plants. In Review.
+Huihui Yu, Mu Li, Jaspreet Sandhu, Guangchao Sun, James C. Schnable, Harkamal Walia, Weibo Xie, Bin Yu, Jeffrey P. Mower, Chi Zhang. Pervasive misannotation of microexons that are evolutionarily conserved and crucial for gene function in plants. *Nat Commun* Accepted (2022)
