@@ -87,7 +87,8 @@ MEPmod<-function(genome, min.score='80%', clusters=seq_len(45),
         names(genome)<-sub("^(\\S+)\\s+.*","\\1",names(genome))
         }
     genome<-genome[width(genome)>=10000]
-    prior.params=letterFrequency(genome[[1]],DNA_BASES,as.prob = TRUE)
+    prior.params=letterFrequency(genome[order(-width(genome))][[1]],
+                                 DNA_BASES,as.prob = TRUE)
     cat(paste(Sys.time(),'..... finished loading genome\n'))
     res<-GRanges()
     for(i in clusters) {
