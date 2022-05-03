@@ -84,8 +84,8 @@ MEPmod<-function(genome, min.score='80%', clusters=seq_len(45),
                  a 'DNAStringSet' class" )
         }
         genome<-readDNAStringSet(genome)
-        names(genome)<-sub("^(\\S+)\\s+.*","\\1",names(genome))
-        }
+    }
+    names(genome)<-sub("^(\\S+)\\s+.*","\\1",names(genome)) # remove description
     genome<-genome[width(genome)>=10000]
     prior.params=letterFrequency(genome[order(-width(genome))][[1]],
                                  DNA_BASES,as.prob = TRUE)
