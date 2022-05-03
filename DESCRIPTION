@@ -1,6 +1,6 @@
 Package: MEPmodeler
 Type: Package
-Version: 0.99.1
+Version: 1.0.1
 Title: Predict MicroExons in Plant Genomes
 Authors@R: c(person("Huihui", "Yu", role = c("aut", "cre"), 
                     email = "yuhuihui2011@foxmail.com", 

@@ -10,6 +10,8 @@
 #' @param min.score	a character string containing a percentage specifying the 
 #' minimum score of each exon block (e.g. \code{"80\%"}). This parameter will 
 #' pass to \link[Biostrings]{matchPWM} from \bold{Biostrings} package.
+#' @param clusters an integer vector between 1 to 45 specifying microexon-tag 
+#' clusters to search (default: all the 45 clusters).
 #' @param include.intronLoss \code{TRUE} or \code{FALSE}. If \code{TRUE}, 
 #' the microexons with any side of flanking intron loss will also be returned.
 #' @param span the maximum spanning region of the microexon-tag (default: 20 kb).
@@ -70,8 +72,9 @@
 #' 
 
 ###
-MEPmod<-function(genome, min.score='80%',include.intronLoss=TRUE,
-                 span=20000, min.intron=20, max.intron=10000, cores=16) {
+MEPmod<-function(genome, min.score='80%', clusters=seq_len(45),
+                 include.intronLoss=TRUE,span=20000, min.intron=20, 
+                 max.intron=10000, cores=4) {
     MEPdata<-MEPmodeler::MEPdata
     cat(paste(t0<-Sys.time(),'..... started run\n'))
     cat(paste(Sys.time(),'..... loading genome\n'))
@@ -87,7 +90,7 @@ MEPmod<-function(genome, min.score='80%',include.intronLoss=TRUE,
     prior.params=letterFrequency(genome[[1]],DNA_BASES,as.prob = TRUE)
     cat(paste(Sys.time(),'..... finished loading genome\n'))
     res<-GRanges()
-    for(i in seq(along.with = MEPdata$blocks)) {
+    for(i in clusters) {
         cat(sprintf('%s ..... Cluster %d (size: %d; phase: %d; motif: %s)\n',
                     Sys.time(),i,MEPdata$cluster$size[i],MEPdata$cluster$phase[i],
                     MEPdata$cluster$motif[i]))

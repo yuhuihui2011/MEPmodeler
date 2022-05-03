@@ -74,6 +74,8 @@ The arguments of the function ***MEPmod*** are as follows:
 | :---------- | :---------- |
 | genome      | the path(s) to the fasta file(s) or a 'DNAStringSet' object.  |
 | min.score   | a character string containing a percentage specifying the minimum score of each exon block (e.g. "80%"). This parameter will pass to *matchPWM* from **Biostrings** package |
+| clusters   | an integer vector between 1 to 45 specifying microexon-tag 
+clusters to search (default: all the 45 clusters). |
 | include.intronLoss | TRUE or FALSE. If TRUE, the microexons with any side of flanking intron loss will also be returned. |
 | span        | the maximum spanning region of the microexon-tag (default: 20 kb). |
 | min.intron  | minimum intron size  |

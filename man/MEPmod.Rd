@@ -7,11 +7,12 @@
 MEPmod(
   genome,
   min.score = "80\%",
+  clusters = seq_len(45),
   include.intronLoss = TRUE,
   span = 20000,
   min.intron = 20,
   max.intron = 10000,
-  cores = 1
+  cores = 4
 )
 }
 \arguments{
@@ -21,6 +22,9 @@ Any contig sequence < 10 kb will be excluded.}
 \item{min.score}{a character string containing a percentage specifying the 
 minimum score of each exon block (e.g. \code{"80\%"}). This parameter will 
 pass to \link[Biostrings]{matchPWM} from \bold{Biostrings} package.}
+
+\item{clusters}{an integer vector between 1 to 45 specifying microexon-tag 
+clusters to search (default: all the 45 clusters)}
 
 \item{include.intronLoss}{\code{TRUE} or \code{FALSE}. If \code{TRUE}, 
 the microexons with any side of flanking intron loss will also be returned.}
