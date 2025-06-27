@@ -1,17 +1,22 @@
 #' Predict MicroExons in a Plant Genome
 #' 
-#' MEPmod searches microexon-tags in 45 conserved microexon clusters in plants 
+#' MEPmod searches microexon-tags in conserved microexon clusters in plants 
 #' using gapped Position Weight Matrix (PWM). The only input file is plant 
 #' genomic sequences or a plant genome. The sequences on both plus and 
 #' minus strands will be scanned.
 #' 
-#' @param genome the path(s) to the fasta file(s) or a 'DNAStringSet' object. 
-#' Any contig sequence < 10 kb will be excluded.
+#' @param genome the path(s) to the fasta file(s) or a 'DNAStringSet' object.
 #' @param min.score	a character string containing a percentage specifying the 
 #' minimum score of each exon block (e.g. \code{"80\%"}). This parameter will 
 #' pass to \link[Biostrings]{matchPWM} from \bold{Biostrings} package.
-#' @param clusters an integer vector between 1 to 45 specifying microexon-tag 
-#' clusters to search (default: all the 45 clusters).
+#' @param clusters an integer vector specifying microexon-tag 
+#' clusters to search (default: \code{NULL} means all clusters).
+#' @param high_complexsity \code{TRUE} or \code{FALSE}. If \code{TRUE} (default), 
+#' only the microexon-tag clusters with sequence complexity >= 0.7 for both side
+#' block sequences will be searched.
+#' @param low_copy \code{TRUE} or \code{FALSE}. If \code{TRUE}, 
+#' only the microexon-tag clusters with 1-3 copies in over 80% of 184 land plants
+#' will be searched (default: \code{FALSE}).
 #' @param include.intronLoss \code{TRUE} or \code{FALSE}. If \code{TRUE}, 
 #' the microexons with any side of flanking intron loss will also be returned.
 #' @param span the maximum spanning region of the microexon-tag (default: 20 kb).
@@ -72,12 +77,34 @@
 #' 
 
 ###
-MEPmod<-function(genome, min.score='80%', clusters=seq_len(45),
-                 include.intronLoss=TRUE,span=20000, min.intron=20, 
-                 max.intron=10000, cores=4) {
-    MEPdata<-MEPmodeler::MEPdata
-    cat(paste(t0<-Sys.time(),'..... started run\n'))
-    cat(paste(Sys.time(),'..... loading genome\n'))
+MEPmod<-function(genome, min.score='80%', clusters=NULL,
+                 high_complexity=TRUE, low_copy=FALSE,
+                 include.intronLoss=TRUE, span=20000, 
+                 min.intron=20, max.intron=10000, cores=5) {
+    MEPdata <- MEPmodeler::MEPdata
+    if (is.null(clusters)) {
+        clusters <- MEPdata$cluster$cluster
+    }
+    if (high_complexity) {
+        sel <- (MEPdata$cluster$L_complex >= 0.7) & (MEPdata$cluster$R_complex >= 0.7)
+        clusters <- clusters[clusters %in% MEPdata$cluster$cluster[sel]]
+    }
+    if (low_copy) {
+        clusters <- clusters[clusters %in% MEPdata$cluster$cluster[MEPdata$cluster$low_copy]]
+    }
+    if (length(clusters)==0) {
+        stop("No microexon cluster will be searched, please check the parameters!")
+    }else{
+        cat(paste(t0<-format(Sys.time()),
+                  sprintf('..... start to search %d microexon cluster(s)\n', length(clusters))))
+    }
+    
+    suppressPackageStartupMessages({
+        library(Biostrings)
+        library(GenomicRanges)
+        library(parallel)
+    })
+    cat(paste(format(Sys.time()),'..... loading genome\n'))
     if (!is(genome, 'DNAStringSet')) {
         if (!is.character(genome)) {
             stop("'genome' must be the path(s) to the fasta file(s) or
@@ -85,15 +112,18 @@ MEPmod<-function(genome, min.score='80%', clusters=seq_len(45),
         }
         genome<-readDNAStringSet(genome)
     }
+    
     names(genome)<-sub("^(\\S+)\\s+.*","\\1",names(genome)) # remove description
-    genome<-genome[width(genome)>=10000]
+    #genome <- genome[width(genome)>=10000]
     prior.params=letterFrequency(genome[order(-width(genome))][[1]],
                                  DNA_BASES,as.prob = TRUE)
-    cat(paste(Sys.time(),'..... finished loading genome\n'))
+    cat(paste(format(Sys.time()),'..... finished loading genome\n'))
+    
     res<-GRanges()
-    for(i in clusters) {
+    for(i in as.integer(clusters)) {
         cat(sprintf('%s ..... Cluster %d (size: %d; phase: %d; motif: %s)\n',
-                    Sys.time(),i,MEPdata$cluster$size[i],MEPdata$cluster$phase[i],
+                    format(Sys.time()), i, MEPdata$cluster$size[i],
+                    MEPdata$cluster$phase[i],
                     MEPdata$cluster$motif[i]))
         res_i<-mapPWM(cons=MEPdata$matrix[[i]],exons=MEPdata$blocks[[i]],genome,
                       focus=MEPdata$cluster$me_order[i],min.score,
@@ -104,8 +134,9 @@ MEPmod<-function(genome, min.score='80%', clusters=seq_len(45),
         res_i$block.sizes<-do.call(c,apply(res_i$block.sizes, 1, IntegerList))
         res_i$cluster<-i
         res<-suppressWarnings(append(res,res_i))
+	    invisible(gc()) # release memory
     }
-    cat(paste(t1<-Sys.time(),'..... finished successfully\n'))
+    cat(paste(t1<-format(Sys.time()),'..... finished successfully\n'))
     cat(sprintf('### total microexon-tags found:\t%d\n', length(res)))
     cat(sprintf('### total time used:\t%s mins\n', 
                 round(difftime(t1,t0,units = 'mins'),2)))
@@ -146,7 +177,7 @@ mapPWM<-function(cons,exons,genome,focus=2, min.score='80%',include.intronLoss=T
     }
     
     plus<-mclapply(genome, function(x) {
-        # find matches for the firest and the last exon
+        # find matches for the first and the last exon
         e1<-suppressWarnings(matchPWM(get('pwm1'),x,min.score))@ranges
         en<-suppressWarnings(matchPWM(get(paste0('pwm',n)),x,min.score))@ranges
         # find regions spanning the first exon and the last exon 
@@ -204,7 +235,7 @@ mapPWM<-function(cons,exons,genome,focus=2, min.score='80%',include.intronLoss=T
         })
         me<-do.call(c,me[elementNROWS(me)>0])
         me
-    },mc.cores = cores)
+    }, mc.cores = cores)
     plus<-unlist(IRangesList(plus[elementNROWS(plus)>0]))
     if (length(plus)==0) plus<-GRanges() else plus<-GRanges(names(plus),plus,'+')
     
@@ -315,7 +346,7 @@ mapPWM.0<-function(cons,exons,genome,min.score="80%",include.intronLoss=TRUE,
         if (length(ov)==0) return(IRanges())
         e1<-ov@first;e3<-ov@second
         intervals<-pgap(e1,e3)
-        me<-lapply(seq(along.with = intervals), function(i) {
+        me<-lapply(seq_along(intervals), function(i) {
             xx<-Views(x,intervals[i])
             m<-suppressWarnings(matchPWM(pwm2,xx,min.score))
             if(length(m)==0) return(IRanges())
