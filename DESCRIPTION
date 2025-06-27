@@ -1,17 +1,17 @@
 Package: MEPmodeler
 Type: Package
-Version: 1.0.1
+Version: 2.0.1
 Title: Predict MicroExons in Plant Genomes
 Authors@R: c(person("Huihui", "Yu", role = c("aut", "cre"), 
                     email = "yuhuihui2011@foxmail.com", 
                     comment = c(ORCID = "0000-0003-2725-1937")),
              person("Chi", "Zhang", role="aut", email="czhang5@unl.edu", 
                     comment = c(ORCID = '0000-0002-1827-8137')))
-Description: MEPmodeler searches microexon-tags in 45 conserved microexon 
-    clusters in plant genomes using gapped Position Weight Matrix (PWM). 
-    The only one function, MEPmod, uses the data MEPdata to mode microexon-tags 
-    in plant genomes. The only input file is plant genomic sequences or a plant 
-    genome. The sequences on both plus and minus strands will be scanned. 
+Description: MEPmodeler identifies conserved microexon-tags in plant genomes, 
+            where each tag comprises a central microexon (1-51 nt) and its flanking coding sequences (typically 108-nt in total length). 
+            The core MEPmod function uses gapped Position Weight Matrix (PWM) with MEPdata trained from 12 land plant species. 
+            Input requires only plant genomic sequences (FASTA or genome assembly), scanning both DNA strands. 
+            This tool enables annotation-free microexon identification, overcoming traditional genome annotation limitations.. 
 URL: https://github.com/yuhuihui2011/MEPmodeler
 BugReports: https://github.com/yuhuihui2011/MEPmodeler/issues
 License: GPL (>= 2.0)
