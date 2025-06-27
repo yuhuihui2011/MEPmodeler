@@ -1,6 +1,6 @@
 # MEPmodeler: Predict <i>M</i>icro<i>E</i>xons in <i>P</i>lant Genomes
 
-MEPmodeler searches microexon-tags in 45 conserved microexon clusters in plant genomes using gapped Position Weight Matrix (PWM). The only one function, ***MEPmod***, uses the data ***MEPdata*** from [MEPsuite](https://github.com/yuhuihui2011/MEPsuite) to model microexons in plant genomes. The only input file is plant genomic sequences or a plant genome. The sequences on both plus and minus strands will be scanned. 
+MEPmodeler identifies conserved microexon-tags in plant genomes, where each tag comprises a central microexon (1-51 nt) and its flanking coding sequences (typically 108-nt in total length). The core ***MEPmod*** function uses gapped Position Weight Matrix (PWM) with ***MEPdata*** trained from 12 land plant species. Input requires only plant genomic sequences (FASTA or genome assembly), scanning both DNA strands. This tool enables annotation-free microexon identification, overcoming traditional genome annotation limitations.  
 <br>
 
 ## Table of contents
