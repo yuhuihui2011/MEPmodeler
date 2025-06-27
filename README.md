@@ -1,6 +1,6 @@
 # MEPmodeler: Predict <i>M</i>icro<i>E</i>xons in <i>P</i>lant Genomes
 
-MEPmodeler identifies conserved microexon-tags in plant genomes, where each tag comprises a central microexon (1-51 nt) and its flanking coding sequences (typically 108-nt in total length). The core ***MEPmod*** function uses gapped Position Weight Matrix (PWM) with ***MEPdata*** trained from 12 land plant species. Input requires only plant genomic sequences (FASTA or genome assembly), scanning both DNA strands. This tool enables annotation-free microexon identification, overcoming traditional genome annotation limitations.  
+MEPmodeler identifies conserved microexon-tags in plant genomes, where each tag comprises a central microexon (1-51 nt) and its flanking coding sequences (typically 108-nt in total length). The core ***MEPmod*** function uses gapped Position Weight Matrix (PWM) with ***MEPdata*** trained from 12 land plant species. Input requires only plant genomic sequences (FASTA or genome assembly), scanning both DNA strands. This tool enables annotation-free microexon-tag identification for plant phylogemomic analysis, overcoming traditional genome annotation limitations.  
 <br>
 
 ## Table of contents
