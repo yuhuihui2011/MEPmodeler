@@ -1,6 +1,6 @@
-#' Information of 45 microexon-tag clusters in plant
+#' Information of microexon-tag clusters in plant
 #' 
-#' MEPdata contains information of 45 microexon-tag clusters in plants.
+#' MEPdata contains information of microexon-tag clusters in plants.
 #' 
 #' @usage data(MEPdata)
 #' 
@@ -10,8 +10,8 @@
 #' (cluster), microexon size (zise) and phase (phase), the coding motif (motif),
 #'  number of exons (exons) and the order of microexon (me_order).
 #' \item MEPdata$blocks: an IntegerList containing exon blocks in each cluster.
-#' \item MEPdata$matrix: a list of 45 elements containng the DNA consensus 
-#' matrix of ecach cluster.
+#' \item MEPdata$matrix: a list of containng the DNA consensus 
+#' matrix for ecach microexon cluster.
 #' }
 #' 
 #' @examples
