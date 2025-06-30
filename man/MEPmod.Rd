@@ -2,63 +2,71 @@
 % Please edit documentation in R/MEPmod.R
 \name{MEPmod}
 \alias{MEPmod}
-\title{Predict MicroExons in a Plant Genome}
+\title{Predict Conserved MicroExons in a Plant Genome}
 \usage{
 MEPmod(
   genome,
   min.score = "80\%",
-  clusters = seq_len(45),
+  clusters = NULL,
+  high_complexity = TRUE,
+  low_copy = FALSE,
   include.intronLoss = TRUE,
   span = 20000,
   min.intron = 20,
   max.intron = 10000,
-  cores = 4
+  cores = 5,
+  quietly = FALSE
 )
 }
 \arguments{
-\item{genome}{the path(s) to the fasta file(s) or a 'DNAStringSet' object. 
-Any contig sequence < 10 kb will be excluded.}
+\item{genome}{Path(s) to FASTA file(s) or a \code{DNAStringSet} object 
+containing genomic sequences.}
 
-\item{min.score}{a character string containing a percentage specifying the 
-minimum score of each exon block (e.g. \code{"80\%"}). This parameter will 
-pass to \link[Biostrings]{matchPWM} from \bold{Biostrings} package.}
+\item{min.score}{Minimum match score threshold for exon blocks 
+(as percentage string, e.g., \code{"80\%"}).
+Passed to \code{\link[Biostrings]{matchPWM}}.}
 
-\item{clusters}{an integer vector between 1 to 45 specifying microexon-tag 
-clusters to search (default: all the 45 clusters)}
+\item{clusters}{Integer vector specifying which microexon-tag clusters to search 
+(default: \code{NULL} searches all clusters).}
 
-\item{include.intronLoss}{\code{TRUE} or \code{FALSE}. If \code{TRUE}, 
-the microexons with any side of flanking intron loss will also be returned.}
+\item{high_complexity}{Logical. If \code{TRUE} (default), only searches 
+clusters with sequence complexity ≥ 0.7 for both 
+flanking regions.}
 
-\item{span}{the maximum spanning region of the microexon-tag (default: 20 kb).}
+\item{low_copy}{Logical. If \code{TRUE}, restricts search to low-copy clusters 
+(1-3 copies in >80\% of 184 land plants).}
 
-\item{min.intron}{minimum intron size}
+\item{include.intronLoss}{Logical. If \code{TRUE}, includes microexons with 
+any flanking intron loss.}
 
-\item{max.intron}{maximum intron size}
+\item{span}{Maximum genomic span for microexon-tag detection (default: 20,000 bp).}
 
-\item{cores}{number of cores to use. This parameter will pass to 
-\link[parallel]{mclapply} as *mc.cores* from \bold{parallel} package.}
+\item{min.intron}{Minimum allowed intron size (bp).}
+
+\item{max.intron}{Maximum allowed intron size (bp).}
+
+\item{cores}{Number of CPU cores to use (passed to \code{\link[parallel]{mclapply}}).}
+
+\item{quietly}{Logical. If \code{TRUE}, suppresses all progress messages. 
+Default: \code{FALSE} (show detailed progress messages).}
 }
 \value{
-A GRanges of microexons with 8 metadata columns:
-\itemize{
-\item NT, 108 bp DNA sequence of microexon-tag (72 bp for cluster 1 and 2).
-\item AA, 36 aa protein sequence translated from NT (24 aa for cluster 1 and 2).
-\item region, the span region of microexon-tag.
-\item block.starts, the genomic coordinates of block start positions 
-(exon, intron, exon, ...).
-\item block.sizes, block sizes (exon, intron, exon, ...).
-\item score, match score of the microexon-tag. 
-Large score indicate high confidence.
-\item isMicroExon, if the microexon has any flanking intron loss, FALSE; 
-otherwise, TRUE.
-\item cluster, which cluster this microexon-tag belongs to.
+A \code{GRanges} object with 8 metadata columns:
+\describe{
+  \item{NT}{DNA sequence of the microexon-tag}
+  \item{AA}{Peptide sequence encoded by the microexon-tag}
+  \item{region}{Genomic span of the microexon-tag}
+  \item{block.starts}{Genomic coordinates of exon/intron boundaries}
+  \item{block.sizes}{Lengths of exons and introns}
+  \item{score}{Match confidence score (higher = more confident)}
+  \item{isMicroExon}{\code{TRUE} if no flanking intron loss, \code{FALSE} otherwise}
+  \item{cluster}{Cluster ID of the detected microexon-tag}
 }
 }
 \description{
-MEPmod searches microexon-tags in 45 conserved microexon clusters in plants 
-using gapped Position Weight Matrix (PWM). The only input file is plant 
-genomic sequences or a plant genome. The sequences on both plus and 
-minus strands will be scanned.
+Identifies microexon-tags in plant genomic sequences using gapped 
+Position Weight Matrices (PWMs). Scans both DNA strands to detect conserved 
+microexon clusters based on sequence patterns.
 }
 \examples{
 suppressPackageStartupMessages(library(BSgenome))
@@ -66,24 +74,25 @@ if (!requireNamespace("BSgenome.Athaliana.TAIR.TAIR9", quietly = TRUE))
     BiocManager::install("BSgenome.Athaliana.TAIR.TAIR9")
 library(BSgenome.Athaliana.TAIR.TAIR9)
 
-Chr1<-BSgenome.Athaliana.TAIR.TAIR9[["Chr1"]]
-Chr1<-DNAStringSet(Chr1)
-names(Chr1)<-'Chr1'
-x<-subseq(Chr1, 1, 1e6)
-x
+data <- DNAStringSet(BSgenome.Athaliana.TAIR.TAIR9$Chr1[1:1e6])
+names(data) <- "Chr1"
 
-mep<-MEPmod(genome=x)
+res <- MEPmod(genome=data, cores=1, clusters=c(1:50))
 
-mep
+res
 # GRanges object with 2 ranges and 8 metadata columns:
-#       seqnames        ranges strand |                      NT                      AA
-#          <Rle>     <IRanges>  <Rle> |          <DNAStringSet>           <AAStringSet>
-#   [1]     Chr1 456757-456761      + | TTTGATGCTA...ACTGTCTGAC FDARTAWSQC...AFGAVESLSD
-#   [2]     Chr1 601547-601560      - | AAAGTTGAAT...ACATTCAGAT KVEFKDNEWK...RLDCLLKHSD
-#              region             block.starts   block.sizes     score isMicroExon   cluster
-#           <IRanges>            <IntegerList> <IntegerList> <numeric>   <logical> <integer>
-#   [1] 456595-456893 456595,456647,456757,...  52,110,5,...    0.9800        TRUE         8
-#   [2] 601327-601700 601653,601561,601547,...  48,92,14,...    0.9241        TRUE        35
+#        seqnames       ranges strand |                      NT
+#          <Rle>     <IRanges>  <Rle> |          <DNAStringSet>
+#   [1]     Chr1 456757-456761      + | TTTGATGCTA...ACTGTCTGAC
+#   [2]     Chr1 601547-601560      - | AAAGTTGAAT...ACATTCAGAT
+#                            AA        region             block.starts   block.sizes
+#                 <AAStringSet>     <IRanges>            <IntegerList> <IntegerList>
+#   [1] FDARTAWSQC...AFGAVESLSD 456595-456893 456595,456647,456757,...  52,110,5,...
+#   [2] KVEFKDNEWK...RLDCLLKHSD 601327-601700 601653,601561,601547,...  48,92,14,...
+#            score isMicroExon   cluster
+#        <numeric>   <logical> <integer>
+#   [1]    0.9817        TRUE         8
+#   [2]    0.9242        TRUE        37
 #   -------
 #   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
