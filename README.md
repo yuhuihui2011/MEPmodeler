@@ -25,109 +25,107 @@ devtools::install_github('yuhuihui2011/MEPmodeler')
 ```
 
 ## Example
-The following example is to predict microexons from Arabidopsis Chr1:1-1000000 sequence: 
+The following example is to predict microexons from Arabidopsis Chr1:1-1000000 sequence
+for microexon cluster 1:50: 
 ```{r}
-library(MEPmodeler)
 suppressPackageStartupMessages(library(BSgenome))
 if (!requireNamespace("BSgenome.Athaliana.TAIR.TAIR9", quietly = TRUE))
     BiocManager::install("BSgenome.Athaliana.TAIR.TAIR9")
-library("BSgenome.Athaliana.TAIR.TAIR9")
-BSgenome.Athaliana.TAIR.TAIR9
-# Arabidopsis genome:
-# # organism: Arabidopsis thaliana (Arabidopsis)
-# # genome: TAIR9
-# # provider: TAIR
-# # release date: June 9, 2009
-# # 7 sequences:
-# #   Chr1 Chr2 Chr3 Chr4 Chr5 ChrM ChrC
-# # (use 'seqnames()' to see all the sequence names, use the '$' or '[[' operator to access a given
-# # sequence)
+library(BSgenome.Athaliana.TAIR.TAIR9)
 
-Chr1<-BSgenome.Athaliana.TAIR.TAIR9[["Chr1"]]
-Chr1<-DNAStringSet(Chr1)
-names(Chr1)<-'Chr1'
-x<-subseq(Chr1, 1, 1e6)
-x
-# DNAStringSet object of length 1:
-#       width seq                                                             names
-# [1] 1000000 CCCTAAACCCTAAACCCTAAACCCTAAACC...CAAGTGCTGAAACGTGTATGATCCGGTTCC Chr1
+data <- DNAStringSet(BSgenome.Athaliana.TAIR.TAIR9$Chr1[1:1e6])
+names(data) <- "Chr1"
 
-mep<-MEPmod(genome=x, cores=1)
+mep <- MEPmod(genome=data, cores=1, clusters=c(1:50), quietly = TRUE)
 
 mep
 # GRanges object with 2 ranges and 8 metadata columns:
-#       seqnames        ranges strand |                      NT                      AA
-#          <Rle>     <IRanges>  <Rle> |          <DNAStringSet>           <AAStringSet>
-#   [1]     Chr1 456757-456761      + | TTTGATGCTA...ACTGTCTGAC FDARTAWSQC...AFGAVESLSD
-#   [2]     Chr1 601547-601560      - | AAAGTTGAAT...ACATTCAGAT KVEFKDNEWK...RLDCLLKHSD
-#              region             block.starts   block.sizes     score isMicroExon   cluster
-#           <IRanges>            <IntegerList> <IntegerList> <numeric>   <logical> <integer>
-#   [1] 456595-456893 456595,456647,456757,...  52,110,5,...    0.9800        TRUE         8
-#   [2] 601327-601700 601653,601561,601547,...  48,92,14,...    0.9241        TRUE        35
+#        seqnames       ranges strand |                      NT
+#          <Rle>     <IRanges>  <Rle> |          <DNAStringSet>
+#   [1]     Chr1 456757-456761      + | TTTGATGCTA...ACTGTCTGAC
+#   [2]     Chr1 601547-601560      - | AAAGTTGAAT...ACATTCAGAT
+#                            AA        region             block.starts   block.sizes
+#                 <AAStringSet>     <IRanges>            <IntegerList> <IntegerList>
+#   [1] FDARTAWSQC...AFGAVESLSD 456595-456893 456595,456647,456757,...  52,110,5,...
+#   [2] KVEFKDNEWK...RLDCLLKHSD 601327-601700 601653,601561,601547,...  48,92,14,...
+#            score isMicroExon   cluster
+#        <numeric>   <logical> <integer>
+#   [1]    0.9817        TRUE         8
+#   [2]    0.9242        TRUE        37
 #   -------
 #   seqinfo: 1 sequence from an unspecified genome; no seqlengths
+
 ```
 
 ## Parameters
 The arguments of the function ***MEPmod*** are as follows:
 | Parameter  | Description  |
 | :---------- | :---------- |
-| genome      | the path(s) to the fasta file(s) or a 'DNAStringSet' object.  |
-| min.score   | a character string containing a percentage specifying the minimum score of each exon block (e.g. "80%"). This parameter will pass to *matchPWM* from **Biostrings** package |
-| clusters    | an integer vector between 1 to 45 specifying microexon-tag clusters to search (default: all the 45 clusters). |
-| include.intronLoss | TRUE or FALSE. If TRUE, the microexons with any side of flanking intron loss will also be returned. |
-| span        | the maximum spanning region of the microexon-tag (default: 20 kb). |
-| min.intron  | minimum intron size  |
-| max.intron  | maximum intron size  |
-| cores       | number of cores to use. This parameter will pass to *mclapply* as *mc.cores* from **parallel** package. |
+| genome      | Path(s) to FASTA file(s) or a "DNAStringSet" object containing genomic sequences.  |
+| min.score   | Minimum match score threshold for exon blocks (as percentage string, e.g., "80%"). Passed to *matchPWM* from **Biostrings** package. |
+| clusters    | Integer vector specifying which microexon-tag clusters to search (default: NULL searches all clusters). |
+| high_complexity | Logical. If TRUE (default), only searches clusters with sequence complexity ≥ 0.7 for both flanking regions. |
+| low_copy | Logical. If TRUE, restricts search to low-copy clusters (1-3 copies in >80% of 184 land plants). |
+| include.intronLoss | Logical. If TRUE, includes microexons with any flanking intron loss. |
+| span        | Maximum genomic span for microexon-tag detection (default: 20,000 bp). |
+| min.intron  | Minimum allowed intron size (bp). |
+| max.intron  | Maximum allowed intron size (bp). |
+| cores       | Number of CPU cores to use. Passed to *mclapply* as *mc.cores* from **parallel** package. |
 #### Warning: The program may be very slow or get stuck for a large genome (> 5 Gb) or a large span region (> 20 kb). 
 
 ## Output
-The function ***MEPmod*** will returm a GRanges of microexons with 8 metadata columns:
+The function ***MEPmod*** will return a GRanges object with 8 metadata columns:
 | Column name  | Description |
 | :---------- | :---------- |
-| NT | 108 bp DNA sequence of microexon-tag (72 bp for cluster 1 and 2) |
-| AA | 36 aa protein sequence translated from NT (24 aa for cluster 1 and 2) |
-| region | the span region of microexon-tag |
-| block.starts | the genomic coordinates of block start positions (exon, intron, exon, ...) |
-| block.sizes | block sizes (exon, intron, exon, ...) |
-| score | match score of the microexon-tag. Large score indicate high confidence. |
-| isMicroExon | if the microexon has any flanking intron loss, FALSE; otherwise, TRUE |
-| cluster | which cluster this microexon-tag belongs to |
+| NT | DNA sequence of the microexon-tag |
+| AA | Peptide sequence encoded by the microexon-tag |
+| region | Genomic span of the microexon-tag |
+| block.starts | Genomic coordinates of exon/intron boundaries |
+| block.sizes | Lengths of exons and introns |
+| score | Match confidence score (higher = more confident) |
+| isMicroExon | TRUE if no flanking intron loss, FALSE otherwise |
+| cluster | Cluster ID of the detected microexon-tag |
 
 ## Downstream analysis
 + Get the cluster information
 ```
 ?MEPdata
 MEPdata$cluster[mep$cluster,]
-#    cluster size phase        motif exons me_order
-# 8        8    5     1 Peptidase_C1     3        2
-# 35      35   14     0   Tudor-knot     3        2
+#    cluster size phase        motif exons me_order rep_complex
+# 8        8    5     1 Peptidase_C1     3        2   0.8775100
+# 37      37   14     0   Tudor-knot     3        2   0.8694779
+#                                                                                                          string
+# 8  TTNGATGCNNGAACNGCTTGGNCTCANTGNANCACNATTGGNANNATNCTNGATCAGGGNCANTGTGGTTCTTGNTGGGCNTTTGGTGCTGTNGANTCACTNTCNGAT
+# 37 AANGNTGANNTNCGNAAGAANGANTGGANATANTTNGTNCATTANCTTGGTTGGANNAAAAANTGGGATGAATGGGTNGGNNNNGANCGNNTGNTGAANNNNACTGAN
+#    L_complex R_complex low_copy
+# 8  0.8980257 0.8369434    FALSE
+# 37 0.8500758 0.8109660     TRUE
 ```
 
 
 + Extract the coordinates of microexons
 ```
-me<-mep[mep$isMicroExon]
-mcols(me)<-mcols(me)<-mcols(me)[c('score','cluster')]
-me<-as.data.frame(me)
+me <- mep[mep$isMicroExon]
+mcols(me) <- mcols(me) <- mcols(me)[c('score','cluster')]
+me <- as.data.frame(me)
 
 me
 #  seqnames  start    end width strand  score cluster
-# 1     Chr1 456757 456761     5      + 0.9800       8
-# 2     Chr1 601547 601560    14      - 0.9241      35
+# 1     Chr1 456757 456761     5      + 0.9817       8
+# 2     Chr1 601547 601560    14      - 0.9242      37
 ```
 
 + Extract intron splicing junctions for RNA-seq mapping (e.g, STAR)
 ```
-junc<-GRangesList(lapply(seq_along(mep), function(i) {
-        n<-length(mep$block.starts[[i]])
-        GRanges(seqnames(mep[i]),
-                IRanges(mep$block.starts[[i]],width = mep$block.sizes[[i]])[seq(2,n,2)],
-                strand(mep[i]))
+junc <- GRangesList(lapply(seq_along(mep), function(i) {
+                n <- length(mep$block.starts[[i]])
+                GRanges(seqnames(mep[i]),
+                       IRanges(mep$block.starts[[i]],
+                               width = mep$block.sizes[[i]])[seq(2,n,2)],
+                               strand(mep[i]))
 }))@unlistData
-junc<-sort(junc[width(junc)>0],ignore.strand=T)
-junc<-as.data.frame(junc)[-4]
+junc <- sort(junc[width(junc)>0], ignore.strand=T)
+junc <- as.data.frame(junc)[-4]
 
 junc
 #  seqnames  start    end strand
@@ -136,41 +134,43 @@ junc
 # 3     Chr1 601373 601546      -
 # 4     Chr1 601561 601652      -
 
-write.table(junc,file='ME.SJ',row.names = F,col.names = F,quote = F,sep='\t')
+write.table(junc,file='ME_SJ.tab',row.names = F,col.names = F,quote = F,sep='\t')
 ```
 
-+ Extract gff file for microexon annotation
++ Extract gff file for microexon-tag annotation
 ```
-gff<-GRangesList(lapply(seq_along(mep), function(i) {
-    n<-length(mep$block.starts[[i]])
-    exon<-GRanges(seqnames(mep[i]),
-            IRanges(mep$block.starts[[i]],width = mep$block.sizes[[i]])[seq(1,n,2)],
-            strand(mep[i]))
-    exon$source<-'MEPmodeler'
-    exon$type<-"exon"
-    exon$score<-mep$score[i]
-    exon$phase<-c(0,cumsum(width(exon)[-length(exon)])%%3)
-    exon$Parent<-as.character(mep[i])
+gff <- GRangesList(lapply(seq_along(mep), function(i) {
+    n <- length(mep$block.starts[[i]])
+    exon <- GRanges(seqnames(mep[i]),
+                    IRanges(mep$block.starts[[i]],
+                            width = mep$block.sizes[[i]])[seq(1,n,2)],
+                            strand(mep[i]))
+    exon$source <- 'MEPmodeler'
+    exon$type <- "CDS"
+    exon$score <- mep$score[i]
+    exon$phase <- c(0,cumsum(width(exon)[-length(exon)])%%3)
+    exon$Parent <- as.character(mep[i])
     exon
 }))@unlistData
+
 gff
 # GRanges object with 6 ranges and 5 metadata columns:
-#       seqnames        ranges strand |      source        type     score     phase
-#          <Rle>     <IRanges>  <Rle> | <character> <character> <numeric> <numeric>
-#   [1]     Chr1 456595-456646      + |  MEPmodeler        exon    0.9800         0
-#   [2]     Chr1 456757-456761      + |  MEPmodeler        exon    0.9800         1
-#   [3]     Chr1 456843-456893      + |  MEPmodeler        exon    0.9800         0
-#   [4]     Chr1 601653-601700      - |  MEPmodeler        exon    0.9241         0
-#   [5]     Chr1 601547-601560      - |  MEPmodeler        exon    0.9241         0
-#   [6]     Chr1 601327-601372      - |  MEPmodeler        exon    0.9241         2
-#                     Parent
-#                <character>
-#   [1] Chr1:456757-456761:+
-#   [2] Chr1:456757-456761:+
-#   [3] Chr1:456757-456761:+
-#   [4] Chr1:601547-601560:-
-#   [5] Chr1:601547-601560:-
-#   [6] Chr1:601547-601560:-
+#       seqnames        ranges strand |      source        type     score
+#          <Rle>     <IRanges>  <Rle> | <character> <character> <numeric>
+#   [1]     Chr1 456595-456646      + |  MEPmodeler        exon    0.9817
+#   [2]     Chr1 456757-456761      + |  MEPmodeler        exon    0.9817
+#   [3]     Chr1 456843-456893      + |  MEPmodeler        exon    0.9817
+#   [4]     Chr1 601653-601700      - |  MEPmodeler        exon    0.9242
+#   [5]     Chr1 601547-601560      - |  MEPmodeler        exon    0.9242
+#   [6]     Chr1 601327-601372      - |  MEPmodeler        exon    0.9242
+#           phase               Parent
+#       <numeric>          <character>
+#   [1]         0 Chr1:456757-456761:+
+#   [2]         1 Chr1:456757-456761:+
+#   [3]         0 Chr1:456757-456761:+
+#   [4]         0 Chr1:601547-601560:-
+#   [5]         0 Chr1:601547-601560:-
+#   [6]         2 Chr1:601547-601560:-
 #   -------
 #   seqinfo: 1 sequence from an unspecified genome; no seqlengths
 
@@ -179,17 +179,17 @@ export.gff3(gff,"ME.gff3")
 Note: The gff file only contain partly transcripts and the first and the last exons are NOT full.
 
 
-+ Extract DNA and protein sequences for phylogenetic analysis
++ Extract DNA or protein sequences for phylogenomic analysis
 ```
 ## DNA sequences
-dna<-mep$NT 
-names(dna)<-as.character(mep)
-writeXStringSet(dna,"dna.fasta")
+dna <- mep$NT 
+names(dna) <- as.character(mep)
+writeXStringSet(dna,"dna.fa")
 
 ## Protein sequences
-prot<-mep$AA
-names(prot)<-as.character(mep)
-writeXStringSet(prot,"prot.fasta")
+prot <- mep$AA
+names(prot) <- as.character(mep)
+writeXStringSet(prot,"prot.fa")
 ```
 ## Citation
 Huihui Yu, Mu Li, Jaspreet Sandhu, Guangchao Sun, James C. Schnable, Harkamal Walia, Weibo Xie, Bin Yu, Jeffrey P. Mower, Chi Zhang. Pervasive misannotation of microexons that are evolutionarily conserved and crucial for gene function in plants. *Nat Commun* **13**, 820 (2022). https://doi.org/10.1038/s41467-022-28449-8
