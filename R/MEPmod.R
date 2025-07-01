@@ -54,7 +54,7 @@
 #' data <- DNAStringSet(BSgenome.Athaliana.TAIR.TAIR9$Chr1[1:1e6])
 #' names(data) <- "Chr1"
 #' 
-#' res <- MEPmod(genome=data, cores=1, clusters=c(1:50))
+#' res <- MEPmod(genome = data, cores = 1, clusters = c(1:50), quietly = TRUE)
 #'
 #' res
 #' # GRanges object with 2 ranges and 8 metadata columns:
