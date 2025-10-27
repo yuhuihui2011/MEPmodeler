@@ -157,12 +157,12 @@ gff
 # GRanges object with 6 ranges and 5 metadata columns:
 #       seqnames        ranges strand |      source        type     score
 #          <Rle>     <IRanges>  <Rle> | <character> <character> <numeric>
-#   [1]     Chr1 456595-456646      + |  MEPmodeler        exon    0.9817
-#   [2]     Chr1 456757-456761      + |  MEPmodeler        exon    0.9817
-#   [3]     Chr1 456843-456893      + |  MEPmodeler        exon    0.9817
-#   [4]     Chr1 601653-601700      - |  MEPmodeler        exon    0.9242
-#   [5]     Chr1 601547-601560      - |  MEPmodeler        exon    0.9242
-#   [6]     Chr1 601327-601372      - |  MEPmodeler        exon    0.9242
+#   [1]     Chr1 456595-456646      + |  MEPmodeler        CDS    0.9817
+#   [2]     Chr1 456757-456761      + |  MEPmodeler        CDS    0.9817
+#   [3]     Chr1 456843-456893      + |  MEPmodeler        CDS    0.9817
+#   [4]     Chr1 601653-601700      - |  MEPmodeler        CDS    0.9242
+#   [5]     Chr1 601547-601560      - |  MEPmodeler        CDS    0.9242
+#   [6]     Chr1 601327-601372      - |  MEPmodeler        CDS    0.9242
 #           phase               Parent
 #       <numeric>          <character>
 #   [1]         0 Chr1:456757-456761:+
